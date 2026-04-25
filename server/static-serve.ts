@@ -15,6 +15,6 @@ export function setupStaticServing(app: express.Application) {
     if (req.path.startsWith('/api/')) {
       return next();
     }
-    res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
+    res.sendFile(path.join(process.cwd(), 'dist/public', 'index.html'));
   });
 }
