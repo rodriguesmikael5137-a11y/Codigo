@@ -1,10 +1,10 @@
-const path = require('path');
+import path from 'path';
+import express from 'express';
 
-export function setupStaticServing(app) {
-  // O caminho direto para onde o site está
-  const publicPath = path.join(process.cwd(), 'dist', 'public');
+export function setupStaticServing(app: express.Application) {
+  const publicPath = path.resolve(process.cwd(), 'dist/public');
 
-  app.use(require('express').static(publicPath));
+  app.use(express.static(publicPath));
 
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api/')) {
