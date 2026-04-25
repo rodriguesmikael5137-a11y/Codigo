@@ -6,9 +6,11 @@ export const vitePort = 3000;
 
 export default defineConfig(({ mode }) => {
   return {
-    base: '/', // Adicionado para corrigir os caminhos no navegador
+    // publicDir: false diz ao Vite para não procurar a pasta 'public' que falta no GitHub
+    publicDir: false, 
     plugins: [
       react(),
+      // Custom plugin to handle source map requests
       {
         name: 'handle-source-map-requests',
         apply: 'serve',
@@ -22,18 +24,27 @@ export default defineConfig(({ mode }) => {
           });
         },
       },
+      // Custom plugin to add CORS headers
       {
         name: 'add-cors-headers',
         apply: 'serve',
         configureServer(server) {
           server.middlewares.use((req, res, next) => {
             res.setHeader('Access-Control-Allow-Origin', '*');
-            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+            res.setHeader(
+              'Access-Control-Allow-Methods',
+              'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+            );
+            res.setHeader(
+              'Access-Control-Allow-Headers',
+              'Content-Type, Authorization, X-Requested-With',
+            );
+
             if (req.method === 'OPTIONS') {
               res.statusCode = 204;
               return res.end();
             }
+
             next();
           });
         },
@@ -41,19 +52,19 @@ export default defineConfig(({ mode }) => {
     ].filter(Boolean),
     resolve: {
       alias: {
-        '@': path.resolve(process.cwd(), './client/src'),
+        '@': path.resolve(__dirname, './client/src'),
       },
     },
     root: path.join(process.cwd(), 'client'),
     build: {
-      // Ajustado para garantir que a pasta saia corretamente para o servidor
-      outDir: path.resolve(process.cwd(), 'dist/public'),
+      outDir: path.join(process.cwd(), 'dist/public'),
       emptyOutDir: true,
-      assetsDir: 'assets',
     },
     clearScreen: false,
     server: {
-      hmr: { overlay: false },
+      hmr: {
+        overlay: false,
+      },
       host: true,
       port: vitePort,
       allowedHosts: true,
@@ -65,7 +76,11 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    css: { devSourcemap: true },
-    esbuild: { sourcemap: true },
+    css: {
+      devSourcemap: true,
+    },
+    esbuild: {
+      sourcemap: true,
+    },
   };
 });
