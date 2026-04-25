@@ -7,7 +7,7 @@ import express from 'express';
  */
 export function setupStaticServing(app: express.Application) {
   // Serve static files from the dist/public directory
-  app.use(express.static(path.join(process.cwd(), 'dist/public')));
+  app.use('/', express.static(path.join(process.cwd(), 'dist/public')));
 
   // For any other routes, serve the index.html file
   app.get('/{*splat}', (req, res, next) => {
