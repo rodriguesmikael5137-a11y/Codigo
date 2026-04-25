@@ -1,26 +1,35 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import { setupStaticServing } from './static-serve.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import articlesRouter from './routes/articles.js';
 
 dotenv.config();
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Body parsing middleware
+// Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// API routes
+// Rota da API
 app.use('/api', articlesRouter);
 
-// Export a function to start the server
-export async function startServer(port) {
+// Servir arquivos da pasta 'client'
+// O '..' serve para sair da pasta 'server' e achar a 'client' na raiz
+const clientPath = path.join(__dirname, '../client');
+app.use(express.static(clientPath));
+
+export async function startServer(port: any) {
   try {
-    if (process.env.NODE_ENV === 'production') {
-      setupStaticServing(app);
-    }
-    app.listen(port,'0.0.0.0', () => {
+    // Rota curinga: Se não for API, entrega o index.html
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(clientPath, 'index.html'));
+    });
+
+    app.listen(port, '0.0.0.0', () => {
       console.log(`API Server running on port ${port}`);
     });
   } catch (err) {
@@ -29,8 +38,6 @@ export async function startServer(port) {
   }
 }
 
-// Start the server directly if this is the main module
 if (import.meta.url === `file://${process.argv[1]}`) {
-  console.log('Starting server...');
   startServer(process.env.PORT || 3001);
 }
