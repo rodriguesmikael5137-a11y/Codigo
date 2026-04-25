@@ -6,17 +6,15 @@ export const vitePort = 3000;
 
 export default defineConfig(({ mode }) => {
   return {
+    base: '/', // Adicionado para corrigir os caminhos no navegador
     plugins: [
       react(),
-      // Custom plugin to handle source map requests
       {
         name: 'handle-source-map-requests',
         apply: 'serve',
         configureServer(server) {
           server.middlewares.use((req, res, next) => {
-            // Check if the request is for a source map file
             if (req.url && req.url.endsWith('.map')) {
-              // Rewrite the URL to remove the query string that's causing the issue
               const cleanUrl = req.url.split('?')[0];
               req.url = cleanUrl;
             }
@@ -24,29 +22,18 @@ export default defineConfig(({ mode }) => {
           });
         },
       },
-      // Custom plugin to add CORS headers
       {
         name: 'add-cors-headers',
         apply: 'serve',
         configureServer(server) {
           server.middlewares.use((req, res, next) => {
-            // Add CORS headers to all responses
             res.setHeader('Access-Control-Allow-Origin', '*');
-            res.setHeader(
-              'Access-Control-Allow-Methods',
-              'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-            );
-            res.setHeader(
-              'Access-Control-Allow-Headers',
-              'Content-Type, Authorization, X-Requested-With',
-            );
-
-            // Handle OPTIONS requests
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
             if (req.method === 'OPTIONS') {
               res.statusCode = 204;
               return res.end();
             }
-
             next();
           });
         },
@@ -54,23 +41,23 @@ export default defineConfig(({ mode }) => {
     ].filter(Boolean),
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './client/src'),
+        '@': path.resolve(process.cwd(), './client/src'),
       },
     },
     root: path.join(process.cwd(), 'client'),
     build: {
-      outDir: path.join(process.cwd(), 'dist/public'),
+      // Ajustado para garantir que a pasta saia corretamente para o servidor
+      outDir: path.resolve(process.cwd(), 'dist/public'),
       emptyOutDir: true,
+      assetsDir: 'assets',
     },
     clearScreen: false,
     server: {
-      hmr: {
-        overlay: false,
-      },
+      hmr: { overlay: false },
       host: true,
       port: vitePort,
       allowedHosts: true,
-      cors: true, // Enable CORS in the dev server
+      cors: true,
       proxy: {
         '/api/': {
           target: 'http://localhost:3001',
@@ -78,13 +65,7 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    // Enable source maps for development
-    css: {
-      devSourcemap: true,
-    },
-    // Ensure source maps are properly generated
-    esbuild: {
-      sourcemap: true,
-    },
+    css: { devSourcemap: true },
+    esbuild: { sourcemap: true },
   };
 });
