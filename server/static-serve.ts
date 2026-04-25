@@ -1,17 +1,19 @@
 import path from 'path';
 import express from 'express';
 
+/**
+ * Sets up static file serving for the Express app
+ * @param app Express application instance
+ */
 export function setupStaticServing(app: express.Application) {
-  const publicPath = path.join(process.cwd(), 'dist', 'public');
+  // Voltando para a sintaxe identica ao seu original que dava verde
+  app.use(express.static(path.join(process.cwd(), "dist", "public")));
 
-  // Forçamos o Express a servir os arquivos estáticos na raiz '/'
-  app.use('/', express.static(publicPath));
-
-  app.get('*', (req, res, next) => {
+  app.get('/{*splat}', (req, res, next) => {
     if (req.path.startsWith('/api/')) {
       return next();
     }
-    // Garantimos que ele entregue o index.html da pasta dist
-    res.sendFile(path.join(publicPath, 'index.html'));
+    // Apontando para o index.html dentro de dist/public
+    res.sendFile(path.join(process.cwd(), "dist", "public", "index.html"));
   });
 }
