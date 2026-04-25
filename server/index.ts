@@ -20,7 +20,7 @@ export async function startServer(port) {
     if (process.env.NODE_ENV === 'production') {
       setupStaticServing(app);
     }
-    app.listen(port,0.0.0.0, () => {
+    app.listen(port,'0.0.0.0', () => {
       console.log(`API Server running on port ${port}`);
     });
   } catch (err) {
