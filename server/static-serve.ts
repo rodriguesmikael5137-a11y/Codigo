@@ -1,20 +1,15 @@
-import path from 'path';
-import express from 'express';
+const path = require('path');
 
-/**
- * Sets up static file serving for the Express app
- * @param app Express application instance
- */
-export function setupStaticServing(app: any) {
-  // Servindo os arquivos da pasta que o Vite cria no Render
-  app.use(express.static(path.join(process.cwd(), 'dist/public')));
+export function setupStaticServing(app) {
+  // O caminho direto para onde o site está
+  const publicPath = path.join(process.cwd(), 'dist', 'public');
 
-  // Para qualquer outra rota, serve o index.html da pasta correta
-  app.get('*', (req: any, res: any, next: any) => {
-    // Pula rotas de API
+  app.use(require('express').static(publicPath));
+
+  app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api/')) {
       return next();
     }
-    res.sendFile(path.join(process.cwd(), 'dist/public', 'index.html'));
+    res.sendFile(path.join(publicPath, 'index.html'));
   });
 }
