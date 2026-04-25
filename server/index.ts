@@ -13,27 +13,26 @@ const __dirname = path.dirname(__filename);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rota da API
+// Rotas da API
 app.use('/api', articlesRouter);
 
-// O SEGREDO ESTÁ AQUI: 
-// O seu log mostrou que o Vite joga tudo para '../dist/public'
-const clientPath = path.join(__dirname, '../dist/public');
+// O SEU LOG MOSTROU ISSO: O Vite coloca tudo em '../dist/public'
+// Vamos usar um caminho relativo que funciona tanto local quanto no Render
+const clientPath = path.resolve(__dirname, '../dist/public');
 
 app.use(express.static(clientPath));
 
 export async function startServer(port: any) {
   try {
     app.get('*', (req, res) => {
-      // Tenta enviar o index.html da pasta que o Vite criou
       res.sendFile(path.join(clientPath, 'index.html'));
     });
 
     app.listen(port, '0.0.0.0', () => {
-      console.log(`Servidor rodando na porta ${port}`);
+      console.log(`Servidor ON na porta ${port}`);
     });
   } catch (err) {
-    console.error('Erro crítico:', err);
+    console.error('Erro ao ligar:', err);
     process.exit(1);
   }
 }
