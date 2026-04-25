@@ -1,20 +1,36 @@
-import path from 'path';
 import express from 'express';
+import dotenv from 'dotenv';
+import { setupStaticServing } from './static-serve.js';
+import articlesRouter from './routes/articles.js';
 
-/**
- * Sets up static file serving for the Express app
- * @param app Express application instance
- */
-export function setupStaticServing(app: express.Application) {
-  // Serve static files from the dist/public directory
-  app.use(express.static(path.join(process.cwd(), 'dist/public')));
+dotenv.config();
 
-  // For any other routes, serve the index.html file
-  app.get('/{*splat}', (req, res, next) => {
-    // Skip API routes
-    if (req.path.startsWith('/api/')) {
-      return next();
+const app = express();
+
+// Body parsing middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// API routes
+app.use('/api', articlesRouter);
+
+// Export a function to start the server
+export async function startServer(port) {
+  try {
+    if (process.env.NODE_ENV === 'production') {
+      setupStaticServing(app);
     }
-    res.sendFile(path.join(process.cwd(), 'dist/public', 'index.html'));
-  });
+    app.listen(port,'0.0.0.0',() => {
+      console.log(`API Server running on port ${port}`);
+    });
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+}
+
+// Start the server directly if this is the main module
+if (import.meta.url === `file://${process.argv[1]}`) {
+  console.log('Starting server...');
+  startServer(process.env.PORT || 3001);
 }
