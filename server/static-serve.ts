@@ -6,15 +6,18 @@ import express from 'express';
  * @param app Express application instance
  */
 export function setupStaticServing(app: express.Application) {
-  // Serve static files from the public directory
-  app.use(express.static(path.join(process.cwd(), 'public')));
+  // 1. Ajustado para 'dist/public' que é onde o seu build realmente está
+  const publicPath = path.join(process.cwd(), 'dist/public');
 
-  // For any other routes, serve the index.html file
-  app.get('/{*splat}', (req, res, next) => {
+  app.use(express.static(publicPath));
+
+  // 2. Para qualquer outra rota, serve o index.html da pasta dist/public
+  app.get('*', (req, res, next) => {
     // Skip API routes
     if (req.path.startsWith('/api/')) {
       return next();
     }
-    res.sendFile(path.join(process.cwd(), 'dist/public', 'index.html'));
+    // Usando path.resolve para não ter erro de "caminho relativo" no Linux do Render
+    res.sendFile(path.resolve(publicPath, 'index.html'));
   });
 }
