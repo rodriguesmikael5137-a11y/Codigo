@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
-export const vitePort = 3000;
+export const vitePort = 0000;
 
 export default defineConfig(({ mode }) => {
   return {
